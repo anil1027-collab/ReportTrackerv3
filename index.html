@@ -307,23 +307,25 @@ async function confirmReset(){
   await deleteStatuses(ids);
 }
 
-// ─── Modal logic ───
-let modalReportId=null, modalOriginalDue=null;
+// ─── Report cache — avoids passing data through onclick attributes ───
+let reportCache={}; // id → report object, rebuilt on every renderAll
 
-function openEditModal(id,name,due,originalDue,comment,type){
+function cacheReport(r){ reportCache[r.id]=r; }
+
+// ─── Modal logic ───
+let modalReportId=null;
+
+function openEditModal(id){
+  let r=reportCache[id]; if(!r) return;
   modalReportId=id;
-  modalOriginalDue=originalDue||due;
-  document.getElementById('modal-title').textContent=name;
-  document.getElementById('modal-subtitle').textContent=(type==='weekly'?'Weekly recurring':'Monthly fixed')+' report';
-  document.getElementById('modal-date').value=dateKey(due);
-  document.getElementById('modal-comment').value=comment||'';
-  // Show original due if overridden
-  let origKey=dateKey(modalOriginalDue);
+  document.getElementById('modal-title').textContent=r.name;
+  document.getElementById('modal-subtitle').textContent=(r.type==='weekly'?'Weekly recurring':'Monthly fixed')+' report';
+  document.getElementById('modal-date').value=dateKey(r.due);
+  document.getElementById('modal-comment').value=(overrides[id]&&overrides[id].comment)||'';
+  let origDue=r.originalDue||r.due;
   document.getElementById('modal-original').textContent=
-    overrides[id]?`Original due date: ${modalOriginalDue.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}`:'';
-  // Show reset button only if already overridden
+    overrides[id]?`Original due date: ${origDue.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}`:'';
   document.getElementById('modal-reset-btn').style.display=overrides[id]?'':'none';
-  // Show previous comment/history if exists
   let hist=document.getElementById('modal-history');
   if(overrides[id]){
     hist.innerHTML=`<div class="history-box">
@@ -366,6 +368,7 @@ function isOverdue(d){return d<TODAY;}
 function isTodayDate(d){return dateKey(d)===dateKey(TODAY);}
 
 function reportCard(r){
+  cacheReport(r); // store in cache so openEditModal can look it up safely
   let s=getStatus(r.id);
   let overdue=s!=='done'&&isOverdue(r.due);
   let todayDue=isTodayDate(r.due);
@@ -378,8 +381,7 @@ function reportCard(r){
   let dueStr=r.due.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
   let meta=`Due ${dueStr}`+(r.dayLabel?` · ${r.dayLabel}`:'');
   let commentLine=r.comment?`<div class="report-comment">💬 ${r.comment}</div>`:'';
-  // Edit button data attrs
-  let origDueKey=r.originalDue?dateKey(r.originalDue):'';
+  // Safe onclick — only passes the ID string, no complex data
   return `<div class="${cls}">
     <div class="report-icon ${iconCls}">${r.icon}</div>
     <div class="report-main" onclick="cycleStatus('${r.id}')">
@@ -388,8 +390,7 @@ function reportCard(r){
       ${commentLine}
     </div>
     <div class="card-actions">
-      <button class="edit-btn" title="Edit due date / add comment"
-        onclick="openEditModal('${r.id}',${JSON.stringify(r.name)},new Date('${dateKey(r.due)}'),${r.originalDue?`new Date('${origDueKey}')`:'null'},${JSON.stringify(r.comment||'')},${JSON.stringify(r.type)})">✏️</button>
+      <button class="edit-btn" title="Edit due date / add comment" onclick="openEditModal('${r.id}')">✏️</button>
       <button class="status-btn ${statusClass(s)}" onclick="cycleStatus('${r.id}')">${statusLabel(s)}</button>
     </div>
   </div>`;
