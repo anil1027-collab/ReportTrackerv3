@@ -126,7 +126,11 @@ function addDays(d,n){let r=new Date(d);r.setDate(r.getDate()+n);return r;}
 function getMonthlyReports(year,month){
   let reports=[];
   function due(day){return pushToMonday(new Date(year,month,day));}
-  reports.push({id:`egypt-hi-1-${year}-${month}`,       name:'Egypt Health Index',          due:due(1),  icon:'📋',type:'monthly',market:'Egypt'});
+  // Only add monthly Egypt HI if 1st is NOT a Friday (Friday instance covered by weekly)
+  let firstDay = new Date(year,month,1).getDay();
+  if(firstDay !== 5){
+    reports.push({id:`egypt-hi-1-${year}-${month}`, name:'Egypt Health Index', due:due(1), icon:'📋',type:'monthly',market:'Egypt'});
+  }
   reports.push({id:`int-at-${year}-${month}`,            name:'Intermediate AT Report',       due:due(2),  icon:'📊',type:'monthly',market:'AT'});
   reports.push({id:`ai-rec-lb-${year}-${month}`,         name:'AI Recommendation — Lebanon',  due:due(8),  icon:'🤖',type:'monthly',market:'Lebanon'});
   reports.push({id:`fin-at-${year}-${month}`,            name:'Finalized AT Report',          due:due(9),  icon:'📊',type:'monthly',market:'AT'});
@@ -198,12 +202,12 @@ async function deleteStatuses(ids){
   if(!isConfigured() || !ids.length) return;
   try{
     setSyncStatus('Resetting…');
-    // Delete in batches using in filter
-    let inClause = ids.map(id=>`"${id}"`).join(',');
-    let res = await fetch(`${TABLE_URL}?id=in.(${encodeURIComponent(ids.join(','))})`, {
+    let inFilter = `(${ids.join(',')})`;
+    let res = await fetch(`${TABLE_URL}?id=in.${encodeURIComponent(inFilter)}`, {
       method:'DELETE',
-      headers: {'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+      headers: {'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY, 'Content-Type':'application/json'}
     });
+    if(!res.ok) throw new Error(await res.text());
     setSyncStatus('✓ Reset complete');
   } catch(e){
     setSyncStatus('⚠ Reset failed: '+e.message);
