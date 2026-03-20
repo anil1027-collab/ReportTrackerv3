@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Report Tracker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f5f4f0;color:#1a1a1a;min-height:100vh}
+.header{background:#1a1a1a;color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.header h1{font-size:17px;font-weight:500}
+.tabs{display:flex;background:#fff;border-bottom:1px solid #e0ddd6}
+.tab{flex:1;padding:12px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:#666;transition:all .2s}
+.tab.active{border-bottom-color:#1a1a1a;color:#1a1a1a}
+.content{padding:16px;max-width:860px;margin:0 auto}
+.month-grid{display:flex;flex-direction:column;gap:3px;margin-bottom:16px}
+.week-row{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.day-label{text-align:center;font-size:11px;font-weight:500;color:#666;padding:4px 0}
+.cal-day{background:#fff;border:1px solid #e0ddd6;border-radius:6px;padding:4px 5px;min-height:62px}
+.cal-day.today{border-color:#1a1a1a;border-width:2px}
+.cal-day.other-month{opacity:.35}
+.cal-day.weekend{background:#fafaf8}
+.day-num{font-size:11px;font-weight:500;color:#666;margin-bottom:3px}
+.cal-day.today .day-num{color:#1a1a1a;font-weight:700}
+.cal-dot{width:100%;font-size:9.5px;line-height:1.4;border-radius:3px;padding:1px 3px;margin-bottom:1px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.dot-pending{background:#fef3e2;color:#b07a10}
+.dot-inprog{background:#e6f0fa;color:#185fa5}
+.dot-done{background:#e4f5ed;color:#0f6e56}
+.section-title{font-size:13px;font-weight:500;color:#666;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px}
+.report-card{background:#fff;border:1px solid #e0ddd6;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:6px;cursor:pointer;transition:border-color .15s}
+.report-card:hover{border-color:#aaa}
+.report-card.overdue{border-left:3px solid #e24b4a}
+.report-card.today-due{border-left:3px solid #f5a623}
+.report-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.icon-weekly{background:#e8f4fd;color:#1565c0}
+.icon-monthly{background:#f3e8fd;color:#6a1b9a}
+.report-main{flex:1;min-width:0}
+.report-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.report-meta{font-size:12px;color:#666;margin-top:2px}
+.status-btn{font-size:11px;font-weight:600;padding:5px 11px;border-radius:20px;border:none;cursor:pointer;flex-shrink:0;transition:all .15s}
+.btn-pending{background:#fef3e2;color:#b07a10}
+.btn-inprog{background:#e6f0fa;color:#185fa5}
+.btn-done{background:#e4f5ed;color:#0f6e56}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:#fff;border-radius:8px;border:1px solid #e0ddd6}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#666}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.nav-btn{background:#fff;border:1px solid #e0ddd6;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:13px;transition:background .15s}
+.nav-btn:hover{background:#f5f4f0}
+.month-title{font-size:15px;font-weight:500;text-align:center}
+.reset-btn{background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;font-size:12px;padding:4px 10px;border-radius:16px;cursor:pointer}
+.reset-btn:hover{background:rgba(255,255,255,.15)}
+.empty{text-align:center;padding:30px;color:#666;font-size:13px}
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.badge-overdue{background:#fde8e8;color:#a32d2d}
+.badge-today{background:#fef3e2;color:#b07a10}
+.toast{position:fixed;bottom:20px;right:20px;background:#1a1a1a;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+.sync-indicator{font-size:11px;opacity:.6;margin-top:2px}
+.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-size:14px;color:#666;z-index:100}
+.spinner{width:28px;height:28px;border:3px solid #e0ddd6;border-top-color:#1a1a1a;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.config-banner{background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:14px 16px;margin:16px;font-size:13px;line-height:1.6}
+.config-banner strong{display:block;margin-bottom:4px;font-size:14px}
+.config-banner code{background:#f5f4f0;padding:1px 5px;border-radius:4px;font-family:monospace;font-size:12px}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     STEP 1: Replace the two values below with your Supabase credentials
+     Project URL  → Supabase dashboard → Settings → API → Project URL
+     Anon Key     → Supabase dashboard → Settings → API → anon / public key
+     ============================================================ -->
+<script>
+const SUPABASE_URL = 'https://nabragyjxubomxdkbojg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hYnJhZ3lqeHVib214ZGtib2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NzYzMzAsImV4cCI6MjA4OTU1MjMzMH0.7QMtGjJ3-kw47xR1rJwbGZzPIIHO355_tnVSe5dJIBE';
+</script>
+<!-- ============================================================ -->
+
+<div class="header">
+  <div>
+    <h1>Report Tracker</h1>
+    <div class="sync-indicator" id="sync-status">Connecting to database…</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="font-size:11px;opacity:.6" id="current-date-label"></div>
+    <button class="reset-btn" onclick="confirmReset()">Reset cycle</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('weekly')" id="tab-weekly">Weekly</div>
+  <div class="tab" onclick="switchTab('monthly')" id="tab-monthly">Monthly</div>
+</div>
+
+<div id="config-warning"></div>
+<div class="content">
+  <div id="view-weekly"></div>
+  <div id="view-monthly" style="display:none"></div>
+</div>
+
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div>Loading statuses…</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+const HEADERS = {'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'resolution=merge-duplicates'};
+const TABLE_URL = SUPABASE_URL + '/rest/v1/report_statuses';
+
+const WFM_MARKETS = ['Lebanon','Hungary','Czech','Slovakia','Bulgaria','Cyprus','Gulf','Egypt','Portugal','Jordan'];
+const HI_MARKETS  = ['Egypt','Hungary','Czech','Slovakia','Bulgaria','Cyprus','Gulf','Lebanon','Portugal'];
+
+function pad(n){return String(n).padStart(2,'0')}
+function dateKey(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+function monthKey(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}`}
+function pushToMonday(d){let r=new Date(d),day=r.getDay();if(day===6)r.setDate(r.getDate()+2);else if(day===0)r.setDate(r.getDate()+1);return r;}
+function allWeekdaysInMonth(year,month,weekday){let dates=[],d=new Date(year,month,1);while(d.getMonth()===month){if(d.getDay()===weekday)dates.push(new Date(d));d.setDate(d.getDate()+1);}return dates;}
+function getMonday(d){let m=new Date(d);m.setHours(0,0,0,0);m.setDate(m.getDate()-((m.getDay()+6)%7));return m;}
+function addDays(d,n){let r=new Date(d);r.setDate(r.getDate()+n);return r;}
+
+function getMonthlyReports(year,month){
+  let reports=[];
+  function due(day){return pushToMonday(new Date(year,month,day));}
+  reports.push({id:`egypt-hi-1-${year}-${month}`,       name:'Egypt Health Index',          due:due(1),  icon:'📋',type:'monthly',market:'Egypt'});
+  reports.push({id:`int-at-${year}-${month}`,            name:'Intermediate AT Report',       due:due(2),  icon:'📊',type:'monthly',market:'AT'});
+  reports.push({id:`ai-rec-lb-${year}-${month}`,         name:'AI Recommendation — Lebanon',  due:due(8),  icon:'🤖',type:'monthly',market:'Lebanon'});
+  reports.push({id:`fin-at-${year}-${month}`,            name:'Finalized AT Report',          due:due(9),  icon:'📊',type:'monthly',market:'AT'});
+  reports.push({id:`sales-dp-${year}-${month}`,          name:'Sales Data Processing',        due:due(9),  icon:'📈',type:'monthly',market:'All'});
+  HI_MARKETS.forEach(m=>reports.push({id:`hi-${m.toLowerCase()}-${year}-${month}`, name:`Health Index — ${m}`, due:due(12), icon:'❤️',type:'monthly',market:m}));
+  reports.push({id:`alin-${year}-${month}`,              name:'Reports for Alin',             due:due(15), icon:'📝',type:'monthly',market:'Alin'});
+  return reports;
+}
+
+function getWeeklyReports(year,month){
+  let reports=[];
+  allWeekdaysInMonth(year,month,5).forEach(d=>{
+    let key=dateKey(d);
+    reports.push({id:`egypt-hi-fri-${key}`,name:'Egypt Health Index',due:new Date(d),icon:'📋',type:'weekly',market:'Egypt',dayLabel:'Every Friday'});
+  });
+  allWeekdaysInMonth(year,month,2).forEach(d=>{
+    let key=dateKey(d);
+    WFM_MARKETS.forEach(m=>reports.push({id:`wfm-${m.toLowerCase()}-${key}`,name:`WFM — ${m}`,due:new Date(d),icon:'🌍',type:'weekly',market:m,dayLabel:'Every Tuesday'}));
+  });
+  allWeekdaysInMonth(year,month,4).forEach(d=>{
+    let key=dateKey(d);
+    ['Czech','Slovakia','Lebanon'].forEach(m=>reports.push({id:`detailed-${m.toLowerCase()}-${key}`,name:`Detailed Report — ${m}`,due:new Date(d),icon:'🔍',type:'weekly',market:m,dayLabel:'Every Thursday'}));
+  });
+  return reports;
+}
+
+// --- Supabase DB ---
+let state = {}; // id -> status
+let dbReady = false;
+
+function isConfigured(){
+  return SUPABASE_URL !== 'PASTE_YOUR_PROJECT_URL_HERE' && SUPABASE_KEY !== 'PASTE_YOUR_ANON_KEY_HERE';
+}
+
+async function loadAllStatuses(){
+  if(!isConfigured()) return;
+  try{
+    let res = await fetch(`${TABLE_URL}?select=id,status`, {headers: {'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    if(!res.ok) throw new Error(await res.text());
+    let rows = await res.json();
+    state = {};
+    rows.forEach(r=>{ state[r.id]=r.status; });
+    dbReady = true;
+    setSyncStatus('✓ Synced with database');
+  } catch(e){
+    setSyncStatus('⚠ DB error: '+e.message);
+    console.error(e);
+  }
+}
+
+async function saveStatus(id, status){
+  if(!isConfigured()) return;
+  try{
+    setSyncStatus('Saving…');
+    let res = await fetch(TABLE_URL, {
+      method:'POST',
+      headers: HEADERS,
+      body: JSON.stringify({id, status, updated_at: new Date().toISOString()})
+    });
+    if(!res.ok) throw new Error(await res.text());
+    setSyncStatus('✓ Saved');
+  } catch(e){
+    setSyncStatus('⚠ Save failed: '+e.message);
+    console.error(e);
+  }
+}
+
+async function deleteStatuses(ids){
+  if(!isConfigured() || !ids.length) return;
+  try{
+    setSyncStatus('Resetting…');
+    // Delete in batches using in filter
+    let inClause = ids.map(id=>`"${id}"`).join(',');
+    let res = await fetch(`${TABLE_URL}?id=in.(${encodeURIComponent(ids.join(','))})`, {
+      method:'DELETE',
+      headers: {'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    setSyncStatus('✓ Reset complete');
+  } catch(e){
+    setSyncStatus('⚠ Reset failed: '+e.message);
+  }
+}
+
+function setSyncStatus(msg){
+  let el = document.getElementById('sync-status');
+  if(el) el.textContent = msg;
+}
+
+function showToast(msg){
+  let t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+function getStatus(id){return state[id]||'pending';}
+
+async function cycleStatus(id){
+  let s=getStatus(id);
+  let next={pending:'inprog',inprog:'done',done:'pending'}[s];
+  state[id]=next;
+  renderAll();
+  await saveStatus(id, next);
+}
+
+async function confirmReset(){
+  if(!confirm('Reset all statuses for the current cycle to Pending?')) return;
+  let yr=viewYear, mo=viewMonth;
+  let reports=[...getMonthlyReports(yr,mo),...getWeeklyReports(yr,mo)];
+  let ids=reports.map(r=>r.id);
+  ids.forEach(id=>{ delete state[id]; });
+  renderAll();
+  await deleteStatuses(ids);
+}
+
+// --- UI helpers ---
+function statusLabel(s){return{pending:'Pending',inprog:'In Progress',done:'Done'}[s];}
+function statusBtnClass(s){return{pending:'btn-pending',inprog:'btn-inprog',done:'btn-done'}[s];}
+function isOverdue(d){return d<TODAY;}
+function isToday(d){return dateKey(d)===dateKey(TODAY);}
+
+function reportCard(r){
+  let s=getStatus(r.id);
+  let cls='report-card';
+  if(s!=='done' && isOverdue(r.due)) cls+=' overdue';
+  else if(isToday(r.due)) cls+=' today-due';
+  let overdueBadge=(s!=='done'&&isOverdue(r.due))?`<span class="badge badge-overdue">Overdue</span>`:'';
+  let todayBadge=isToday(r.due)?`<span class="badge badge-today">Due today</span>`:'';
+  let iconClass=r.type==='weekly'?'icon-weekly':'icon-monthly';
+  let dueStr=r.due.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  let metaExtra=r.dayLabel?` · ${r.dayLabel}`:'';
+  return `<div class="${cls}" onclick="cycleStatus('${r.id}')">
+    <div class="report-icon ${iconClass}">${r.icon}</div>
+    <div class="report-main">
+      <div class="report-name">${r.name}${overdueBadge}${todayBadge}</div>
+      <div class="report-meta">Due ${dueStr}${metaExtra}</div>
+    </div>
+    <button class="status-btn ${statusBtnClass(s)}" onclick="event.stopPropagation();cycleStatus('${r.id}')">${statusLabel(s)}</button>
+  </div>`;
+}
+
+function groupByDate(reports){
+  let g={};
+  reports.forEach(r=>{let k=dateKey(r.due);g[k]=g[k]||[];g[k].push(r);});
+  return g;
+}
+
+// --- Views ---
+let currentTab='weekly', viewYear=TODAY.getFullYear(), viewMonth=TODAY.getMonth();
+let viewWeekStart=getMonday(TODAY);
+
+function changeWeek(dir){viewWeekStart=addDays(viewWeekStart,dir*7);renderAll();}
+function changeMonth(dir){
+  viewMonth+=dir;
+  if(viewMonth<0){viewMonth=11;viewYear--;}
+  if(viewMonth>11){viewMonth=0;viewYear++;}
+  renderAll();
+}
+
+function switchTab(t){
+  currentTab=t;
+  document.getElementById('tab-weekly').className='tab'+(t==='weekly'?' active':'');
+  document.getElementById('tab-monthly').className='tab'+(t==='monthly'?' active':'');
+  document.getElementById('view-weekly').style.display=t==='weekly'?'':'none';
+  document.getElementById('view-monthly').style.display=t==='monthly'?'':'none';
+  renderAll();
+}
+
+function renderWeekly(){
+  let wStart=viewWeekStart, wEnd=addDays(wStart,6);
+  let allReports=[], seen=new Set();
+  [[wStart.getFullYear(),wStart.getMonth()],[wEnd.getFullYear(),wEnd.getMonth()]]
+    .filter((v,i,a)=>a.findIndex(x=>x[0]===v[0]&&x[1]===v[1])===i)
+    .forEach(([y,m])=>allReports.push(...getWeeklyReports(y,m)));
+  allReports=allReports.filter(r=>{if(seen.has(r.id))return false;seen.add(r.id);return true;});
+  let wStartKey=dateKey(wStart), wEndKey=dateKey(wEnd);
+  let reports=allReports.filter(r=>{let dk=dateKey(r.due);return dk>=wStartKey&&dk<=wEndKey;});
+
+  let wLabel=`${wStart.toLocaleDateString('en-GB',{day:'numeric',month:'short'})} – ${wEnd.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}`;
+  let html=`<div class="nav-row">
+    <button class="nav-btn" onclick="changeWeek(-1)">← Prev week</button>
+    <span class="month-title">Week of ${wLabel}</span>
+    <button class="nav-btn" onclick="changeWeek(1)">Next week →</button>
+  </div>`;
+  html+=`<div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#f5a623"></div>Pending</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3b8bd4"></div>In Progress</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#2e9e6b"></div>Done</div>
+    <div class="legend-item" style="margin-left:auto;font-size:11px">Tap any report to cycle status</div>
+  </div>`;
+  if(!reports.length){html+=`<div class="empty">No weekly reports this week.</div>`;}
+  else{
+    let groups=groupByDate(reports);
+    Object.keys(groups).sort().forEach(dk=>{
+      let reps=groups[dk], d=reps[0].due;
+      let dayName=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
+      html+=`<div style="font-size:12px;font-weight:600;color:#666;margin:8px 0 4px;padding-left:4px">${dayName}</div>`;
+      reps.forEach(r=>{html+=reportCard(r);});
+    });
+  }
+  document.getElementById('view-weekly').innerHTML=html;
+}
+
+function renderMonthly(){
+  let yr=viewYear, mo=viewMonth;
+  let reports=[...getMonthlyReports(yr,mo),...getWeeklyReports(yr,mo)];
+  let mName=new Date(yr,mo,1).toLocaleString('en-GB',{month:'long',year:'numeric'});
+  let html=`<div class="nav-row">
+    <button class="nav-btn" onclick="changeMonth(-1)">← Prev</button>
+    <span class="month-title">${mName}</span>
+    <button class="nav-btn" onclick="changeMonth(1)">Next →</button>
+  </div>`;
+  html+=buildCalendar(yr,mo,reports);
+  html+=`<div class="legend" style="margin-top:14px">
+    <div class="legend-item"><div class="legend-dot" style="background:#f5a623"></div>Pending</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3b8bd4"></div>In Progress</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#2e9e6b"></div>Done</div>
+  </div>`;
+  let groups=groupByDate(reports);
+  Object.keys(groups).sort().forEach(dk=>{
+    let reps=groups[dk], d=reps[0].due;
+    let dayName=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+    html+=`<div class="section-title">${dayName}</div>`;
+    reps.forEach(r=>{html+=reportCard(r);});
+  });
+  document.getElementById('view-monthly').innerHTML=html;
+}
+
+function buildCalendar(yr,mo,reports){
+  let dayMap={};
+  reports.forEach(r=>{let dk=dateKey(r.due);dayMap[dk]=dayMap[dk]||[];dayMap[dk].push(r);});
+  let days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let html=`<div class="month-grid"><div class="week-row">`;
+  days.forEach(d=>{html+=`<div class="day-label">${d}</div>`;});
+  html+=`</div>`;
+  let first=new Date(yr,mo,1);
+  let startDow=(first.getDay()+6)%7;
+  let daysInMonth=new Date(yr,mo+1,0).getDate();
+  let prevMonthDays=new Date(yr,mo,0).getDate();
+  let cells=[];
+  for(let i=startDow-1;i>=0;i--) cells.push({day:prevMonthDays-i,month:mo-1<0?11:mo-1,year:mo-1<0?yr-1:yr,other:true});
+  for(let d=1;d<=daysInMonth;d++) cells.push({day:d,month:mo,year:yr,other:false});
+  while(cells.length%7!==0){let last=cells.length-(daysInMonth+startDow)+1;cells.push({day:last,month:mo+1>11?0:mo+1,year:mo+1>11?yr+1:yr,other:true});}
+  for(let i=0;i<cells.length;i++){
+    if(i%7===0) html+=`<div class="week-row">`;
+    let c=cells[i], d=new Date(c.year,c.month,c.day);
+    let dk=dateKey(d), isWeekend=d.getDay()===0||d.getDay()===6;
+    let isTod=!c.other&&dateKey(d)===dateKey(TODAY);
+    let cls='cal-day'+(c.other?' other-month':'')+(isWeekend?' weekend':'')+(isTod?' today':'');
+    html+=`<div class="${cls}"><div class="day-num">${c.day}</div>`;
+    if(dayMap[dk]&&!c.other){
+      let reps=dayMap[dk], show=Math.min(reps.length,3);
+      for(let j=0;j<show;j++){
+        let s=getStatus(reps[j].id);
+        let dotCls={pending:'dot-pending',inprog:'dot-inprog',done:'dot-done'}[s];
+        let shortName=reps[j].name.replace('Health Index','HI').replace('Report','Rpt').replace('Detailed','Dtl').replace('Intermediate','Int.').replace('Finalized','Final').replace('Recommendation','Rec').replace('— ','');
+        html+=`<div class="cal-dot ${dotCls}" title="${reps[j].name}">${shortName}</div>`;
+      }
+      if(reps.length>3) html+=`<div class="cal-dot" style="font-size:9px;color:#666;background:transparent">+${reps.length-3} more</div>`;
+    }
+    html+=`</div>`;
+    if(i%7===6) html+=`</div>`;
+  }
+  html+=`</div>`;
+  return html;
+}
+
+function renderAll(){
+  document.getElementById('current-date-label').textContent=
+    TODAY.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  if(currentTab==='weekly') renderWeekly();
+  else renderMonthly();
+}
+
+// --- Config warning ---
+function showConfigWarning(){
+  document.getElementById('config-warning').innerHTML=`
+  <div class="config-banner">
+    <strong>⚙️ Setup required — add your Supabase credentials</strong>
+    Open this HTML file and replace the two placeholder values near the top of the &lt;script&gt; block:<br><br>
+    <code>const SUPABASE_URL = 'PASTE_YOUR_PROJECT_URL_HERE';</code><br>
+    <code>const SUPABASE_KEY = 'PASTE_YOUR_ANON_KEY_HERE';</code><br><br>
+    Until then, statuses are saved in memory only (lost on refresh).
+  </div>`;
+}
+
+// --- Init ---
+async function init(){
+  if(!isConfigured()){
+    showConfigWarning();
+    setSyncStatus('⚠ Credentials not set — using memory only');
+    document.getElementById('loading').style.display='none';
+    renderAll();
+    return;
+  }
+  await loadAllStatuses();
+  document.getElementById('loading').style.display='none';
+  renderAll();
+}
+
+init();
+</script>
+</body>
+</html>
