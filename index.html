@@ -135,7 +135,7 @@ const OVERRIDE_URL=SUPABASE_URL+'/rest/v1/report_overrides';
       <textarea id="modal-comment" placeholder="e.g. Client requested delay, data not ready…"></textarea>
     </div>
     <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-secondary" onclick="closeModalBtn()">Cancel</button>
       <button id="modal-reset-btn" class="btn-danger" onclick="clearOverride()" style="display:none">Reset to original</button>
       <button class="btn-primary" onclick="saveOverride()">Save changes</button>
     </div>
@@ -307,16 +307,19 @@ async function confirmReset(){
   await deleteStatuses(ids);
 }
 
-// ─── Report cache — avoids passing data through onclick attributes ───
-let reportCache={}; // id → report object, rebuilt on every renderAll
+// ─── Report cache — rebuilt fresh before each render pass ───
+let reportCache={};
 
 function cacheReport(r){ reportCache[r.id]=r; }
+
+function resetCache(){ reportCache={}; }
 
 // ─── Modal logic ───
 let modalReportId=null;
 
 function openEditModal(id){
-  let r=reportCache[id]; if(!r) return;
+  let r=reportCache[id];
+  if(!r){ console.error('Report not found in cache:', id); return; }
   modalReportId=id;
   document.getElementById('modal-title').textContent=r.name;
   document.getElementById('modal-subtitle').textContent=(r.type==='weekly'?'Weekly recurring':'Monthly fixed')+' report';
@@ -324,16 +327,26 @@ function openEditModal(id){
   document.getElementById('modal-comment').value=(overrides[id]&&overrides[id].comment)||'';
   let origDue=r.originalDue||r.due;
   document.getElementById('modal-original').textContent=
-    overrides[id]?`Original due date: ${origDue.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}`:'';
+    overrides[id]?`Original due: ${origDue.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}`:'';
   document.getElementById('modal-reset-btn').style.display=overrides[id]?'':'none';
   let hist=document.getElementById('modal-history');
-  if(overrides[id]){
-    hist.innerHTML=`<div class="history-box">
-      <strong>Current override:</strong> Due changed to ${parseDateKey(overrides[id].due_date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
-      ${overrides[id].comment?`<br><strong>Reason:</strong> ${overrides[id].comment}`:''}
-    </div>`;
-  } else { hist.innerHTML=''; }
+  hist.innerHTML=overrides[id]?`<div class="history-box">
+    <strong>Current override:</strong> Due changed to ${parseDateKey(overrides[id].due_date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
+    ${overrides[id].comment?`<br><strong>Reason:</strong> ${overrides[id].comment}`:''}
+  </div>`:'';
   document.getElementById('modal').style.display='flex';
+}
+
+function closeModal(e){
+  // Only close if clicking the backdrop itself, or called directly (no event)
+  if(e && e.currentTarget !== e.target) return;
+  document.getElementById('modal').style.display='none';
+  modalReportId=null;
+}
+
+function closeModalBtn(){
+  document.getElementById('modal').style.display='none';
+  modalReportId=null;
 }
 
 function closeModal(e){
@@ -390,8 +403,8 @@ function reportCard(r){
       ${commentLine}
     </div>
     <div class="card-actions">
-      <button class="edit-btn" title="Edit due date / add comment" onclick="openEditModal('${r.id}')">✏️</button>
-      <button class="status-btn ${statusClass(s)}" onclick="cycleStatus('${r.id}')">${statusLabel(s)}</button>
+      <button class="edit-btn" title="Edit due date / add comment" onclick="event.stopPropagation();openEditModal('${r.id}')">Edit</button>
+      <button class="status-btn ${statusClass(s)}" onclick="event.stopPropagation();cycleStatus('${r.id}')">${statusLabel(s)}</button>
     </div>
   </div>`;
 }
@@ -516,6 +529,7 @@ function buildCalendar(yr,month1,reports){
 }
 
 function renderAll(){
+  resetCache(); // clear stale report references before rebuilding
   document.getElementById('date-label').textContent=TODAY.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   if(currentTab==='weekly') renderWeekly();
   else renderMonthly();
