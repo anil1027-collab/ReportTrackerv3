@@ -23,29 +23,37 @@ body{font-family:system-ui,sans-serif;background:#f5f4f0;color:#1a1a1a;min-heigh
 .ldot{width:10px;height:10px;border-radius:50%}
 .section-title{font-size:12px;font-weight:600;color:#666;margin:10px 0 4px;padding-left:4px}
 .section-title.today-hd{color:#1a1a1a}
-.report-card{background:#fff;border:1px solid #e0ddd6;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:6px;cursor:pointer;transition:border-color .15s}
-.report-card:hover{border-color:#aaa}
+
+/* Report card */
+.report-card{background:#fff;border:1px solid #e0ddd6;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:6px}
 .report-card.overdue{border-left:3px solid #e24b4a}
 .report-card.today-due{border-left:3px solid #f5a623}
+.report-card.overridden{border-left:3px solid #7f77dd}
 .report-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .icon-weekly{background:#e8f4fd;color:#1565c0}
 .icon-monthly{background:#f3e8fd;color:#6a1b9a}
-.report-main{flex:1;min-width:0}
+.report-main{flex:1;min-width:0;cursor:pointer}
 .report-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .report-meta{font-size:12px;color:#666;margin-top:2px}
-.status-btn{font-size:11px;font-weight:600;padding:5px 11px;border-radius:20px;border:none;cursor:pointer;flex-shrink:0}
+.report-comment{font-size:11px;color:#7f77dd;margin-top:3px;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.status-btn{font-size:11px;font-weight:600;padding:5px 11px;border-radius:20px;border:none;cursor:pointer}
 .btn-pending{background:#fef3e2;color:#b07a10}
 .btn-inprog{background:#e6f0fa;color:#185fa5}
 .btn-done{background:#e4f5ed;color:#0f6e56}
+.edit-btn{width:28px;height:28px;border-radius:6px;border:1px solid #e0ddd6;background:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:#666;flex-shrink:0}
+.edit-btn:hover{background:#f5f4f0;border-color:#aaa}
 .badge{display:inline-block;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;margin-left:5px;vertical-align:middle}
 .badge-overdue{background:#fde8e8;color:#a32d2d}
 .badge-today{background:#fef3e2;color:#b07a10}
+.badge-overridden{background:#eeedfe;color:#3c3489}
 .empty{text-align:center;padding:30px;color:#666;font-size:13px}
 .reset-btn{background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;font-size:12px;padding:4px 10px;border-radius:16px;cursor:pointer}
 .reset-btn:hover{background:rgba(255,255,255,.15)}
 .loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-size:14px;color:#666;z-index:100}
 .spinner{width:28px;height:28px;border:3px solid #e0ddd6;border-top-color:#1a1a1a;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+
 /* Calendar */
 .month-grid{display:flex;flex-direction:column;gap:3px;margin-bottom:14px}
 .week-row{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
@@ -60,22 +68,41 @@ body{font-family:system-ui,sans-serif;background:#f5f4f0;color:#1a1a1a;min-heigh
 .dot-pending{background:#fef3e2;color:#b07a10}
 .dot-inprog{background:#e6f0fa;color:#185fa5}
 .dot-done{background:#e4f5ed;color:#0f6e56}
+
+/* Modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:440px;padding:24px;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:4px}
+.modal-subtitle{font-size:12px;color:#666;margin-bottom:20px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:600;color:#444;margin-bottom:6px}
+.field input,.field textarea{width:100%;border:1px solid #e0ddd6;border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;color:#1a1a1a;outline:none;transition:border-color .15s}
+.field input:focus,.field textarea:focus{border-color:#1a1a1a}
+.field textarea{resize:vertical;min-height:80px}
+.field .original{font-size:11px;color:#888;margin-top:4px}
+.modal-actions{display:flex;gap:8px;margin-top:20px}
+.btn-primary{flex:1;padding:10px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+.btn-primary:hover{background:#333}
+.btn-secondary{padding:10px 16px;background:#f5f4f0;color:#1a1a1a;border:1px solid #e0ddd6;border-radius:8px;font-size:13px;cursor:pointer}
+.btn-secondary:hover{background:#ebe9e4}
+.btn-danger{padding:10px 16px;background:#fde8e8;color:#a32d2d;border:1px solid #f7c1c1;border-radius:8px;font-size:13px;cursor:pointer}
+.btn-danger:hover{background:#f7c1c1}
+.history-box{background:#f5f4f0;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12px;color:#555;line-height:1.6}
+.history-box strong{color:#1a1a1a}
 </style>
 </head>
 <body>
 
 <script>
-const SUPABASE_URL = 'https://nabragyjxubomxdkbojg.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hYnJhZ3lqeHVib214ZGtib2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NzYzMzAsImV4cCI6MjA4OTU1MjMzMH0.7QMtGjJ3-kw47xR1rJwbGZzPIIHO355_tnVSe5dJIBE';
-const TABLE_URL = SUPABASE_URL+'/rest/v1/report_statuses';
-const AUTH_HEADERS = {'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'};
+const SUPABASE_URL='https://nabragyjxubomxdkbojg.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hYnJhZ3lqeHVib214ZGtib2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NzYzMzAsImV4cCI6MjA4OTU1MjMzMH0.7QMtGjJ3-kw47xR1rJwbGZzPIIHO355_tnVSe5dJIBE';
+const HDR={'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'};
+const STATUS_URL=SUPABASE_URL+'/rest/v1/report_statuses';
+const OVERRIDE_URL=SUPABASE_URL+'/rest/v1/report_overrides';
 </script>
 
 <div class="header">
-  <div>
-    <h1>Report Tracker</h1>
-    <div class="sync" id="sync-status">Connecting…</div>
-  </div>
+  <div><h1>Report Tracker</h1><div class="sync" id="sync-status">Connecting…</div></div>
   <div style="display:flex;align-items:center;gap:10px">
     <div style="font-size:11px;opacity:.6" id="date-label"></div>
     <button class="reset-btn" onclick="confirmReset()">Reset cycle</button>
@@ -92,149 +119,174 @@ const AUTH_HEADERS = {'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_K
   <div id="view-monthly" style="display:none"></div>
 </div>
 
+<!-- Edit Modal -->
+<div class="modal-backdrop" id="modal" style="display:none" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-subtitle" id="modal-subtitle"></div>
+    <div id="modal-history"></div>
+    <div class="field">
+      <label>Due date</label>
+      <input type="date" id="modal-date">
+      <div class="original" id="modal-original"></div>
+    </div>
+    <div class="field">
+      <label>Reason / comment <span style="font-weight:400;color:#999">(optional)</span></label>
+      <textarea id="modal-comment" placeholder="e.g. Client requested delay, data not ready…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button id="modal-reset-btn" class="btn-danger" onclick="clearOverride()" style="display:none">Reset to original</button>
+      <button class="btn-primary" onclick="saveOverride()">Save changes</button>
+    </div>
+  </div>
+</div>
+
 <div class="loading-overlay" id="loading">
   <div class="spinner"></div>
-  <div>Loading statuses…</div>
+  <div>Loading…</div>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════
-// ALL DATE FUNCTIONS USE month1 (1=Jan … 12=Dec)
-// JS Date constructor always called as new Date(year, month1-1, day)
-// Zero-based conversion happens ONCE at the boundary (getMonth()+1)
+// DATE HELPERS — month1 = 1-based (1=Jan…12=Dec)
 // ═══════════════════════════════════════════════
-
-const TODAY = new Date(); TODAY.setHours(0,0,0,0);
-
+const TODAY=new Date(); TODAY.setHours(0,0,0,0);
 function pad(n){return String(n).padStart(2,'0')}
 function dateKey(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
 function addDays(d,n){let r=new Date(d);r.setDate(r.getDate()+n);return r;}
 function getMonday(d){let r=new Date(d);r.setHours(0,0,0,0);r.setDate(r.getDate()-((r.getDay()+6)%7));return r;}
+function parseDateKey(s){let[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
 
-// Takes plain numbers — no Date object input — avoids zero-based confusion
-function pushToMonday(year, month1, day){
-  let d=new Date(year, month1-1, day);
+function pushToMonday(year,month1,day){
+  let d=new Date(year,month1-1,day);
   let dow=d.getDay();
-  if(dow===6) d.setDate(d.getDate()+2);
-  else if(dow===0) d.setDate(d.getDate()+1);
+  if(dow===6)d.setDate(d.getDate()+2);
+  else if(dow===0)d.setDate(d.getDate()+1);
   return d;
 }
-
-// weekday: 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
-function allWeekdaysInMonth(year, month1, weekday){
-  let dates=[], d=new Date(year, month1-1, 1);
-  while(d.getMonth()===month1-1){
-    if(d.getDay()===weekday) dates.push(new Date(d));
-    d.setDate(d.getDate()+1);
-  }
+function allWeekdaysInMonth(year,month1,weekday){
+  let dates=[],d=new Date(year,month1-1,1);
+  while(d.getMonth()===month1-1){if(d.getDay()===weekday)dates.push(new Date(d));d.setDate(d.getDate()+1);}
   return dates;
 }
 
 const WFM=['Lebanon','Hungary','Czech','Slovakia','Bulgaria','Cyprus','Gulf','Egypt','Portugal','Jordan'];
 const HI9=['Egypt','Hungary','Czech','Slovakia','Bulgaria','Cyprus','Gulf','Lebanon','Portugal'];
 
-function getMonthlyReports(year, month1){
+function getMonthlyReports(year,month1){
   let r=[];
-  let firstDow=new Date(year, month1-1, 1).getDay();
-  // Skip 1st-of-month Egypt HI if 1st is Friday — the weekly rule already covers it
-  if(firstDow!==5)
-    r.push({id:`egypt-hi-1-${year}-${month1}`,    name:'Egypt Health Index',          due:pushToMonday(year,month1,1),  icon:'📋',type:'monthly'});
-  r.push({id:`int-at-${year}-${month1}`,           name:'Intermediate AT Report',       due:pushToMonday(year,month1,2),  icon:'📊',type:'monthly'});
-  r.push({id:`ai-rec-lb-${year}-${month1}`,        name:'AI Recommendation — Lebanon',  due:pushToMonday(year,month1,8),  icon:'🤖',type:'monthly'});
-  r.push({id:`fin-at-${year}-${month1}`,           name:'Finalized AT Report',          due:pushToMonday(year,month1,9),  icon:'📊',type:'monthly'});
-  r.push({id:`sales-dp-${year}-${month1}`,         name:'Sales Data Processing',        due:pushToMonday(year,month1,9),  icon:'📈',type:'monthly'});
-  HI9.forEach(m=>r.push({
-    id:`hi-${m.toLowerCase()}-${year}-${month1}`,
-    name:`Health Index — ${m}`,
-    due:pushToMonday(year,month1,12),
-    icon:'❤️', type:'monthly'
-  }));
-  r.push({id:`alin-${year}-${month1}`,             name:'Reports for Alin',             due:pushToMonday(year,month1,15), icon:'📝',type:'monthly'});
+  let firstDow=new Date(year,month1-1,1).getDay();
+  if(firstDow!==5)r.push({id:`egypt-hi-1-${year}-${month1}`,name:'Egypt Health Index',due:pushToMonday(year,month1,1),icon:'📋',type:'monthly'});
+  r.push({id:`int-at-${year}-${month1}`,name:'Intermediate AT Report',due:pushToMonday(year,month1,2),icon:'📊',type:'monthly'});
+  r.push({id:`ai-rec-lb-${year}-${month1}`,name:'AI Recommendation — Lebanon',due:pushToMonday(year,month1,8),icon:'🤖',type:'monthly'});
+  r.push({id:`fin-at-${year}-${month1}`,name:'Finalized AT Report',due:pushToMonday(year,month1,9),icon:'📊',type:'monthly'});
+  r.push({id:`sales-dp-${year}-${month1}`,name:'Sales Data Processing',due:pushToMonday(year,month1,9),icon:'📈',type:'monthly'});
+  HI9.forEach(m=>r.push({id:`hi-${m.toLowerCase()}-${year}-${month1}`,name:`Health Index — ${m}`,due:pushToMonday(year,month1,12),icon:'❤️',type:'monthly'}));
+  r.push({id:`alin-${year}-${month1}`,name:'Reports for Alin',due:pushToMonday(year,month1,15),icon:'📝',type:'monthly'});
+  return r;
+}
+function getWeeklyReports(year,month1){
+  let r=[];
+  allWeekdaysInMonth(year,month1,5).forEach(d=>{let k=dateKey(d);r.push({id:`egypt-hi-fri-${k}`,name:'Egypt Health Index',due:new Date(d),icon:'📋',type:'weekly',dayLabel:'Every Friday'});});
+  allWeekdaysInMonth(year,month1,2).forEach(d=>{let k=dateKey(d);WFM.forEach(m=>r.push({id:`wfm-${m.toLowerCase()}-${k}`,name:`WFM — ${m}`,due:new Date(d),icon:'🌍',type:'weekly',dayLabel:'Every Tuesday'}));});
+  allWeekdaysInMonth(year,month1,4).forEach(d=>{let k=dateKey(d);['Czech','Slovakia','Lebanon'].forEach(m=>r.push({id:`detailed-${m.toLowerCase()}-${k}`,name:`Detailed Report — ${m}`,due:new Date(d),icon:'🔍',type:'weekly',dayLabel:'Every Thursday'}));});
   return r;
 }
 
-function getWeeklyReports(year, month1){
-  let r=[];
-  allWeekdaysInMonth(year,month1,5).forEach(d=>{
-    let k=dateKey(d);
-    r.push({id:`egypt-hi-fri-${k}`,name:'Egypt Health Index',due:new Date(d),icon:'📋',type:'weekly',dayLabel:'Every Friday'});
+// Apply overrides to reports — replaces due date if an override exists
+function applyOverrides(reports){
+  return reports.map(r=>{
+    let ov=overrides[r.id];
+    if(ov){
+      return {...r, due:parseDateKey(ov.due_date), originalDue:r.due, comment:ov.comment, overridden:true};
+    }
+    return r;
   });
-  allWeekdaysInMonth(year,month1,2).forEach(d=>{
-    let k=dateKey(d);
-    WFM.forEach(m=>r.push({id:`wfm-${m.toLowerCase()}-${k}`,name:`WFM — ${m}`,due:new Date(d),icon:'🌍',type:'weekly',dayLabel:'Every Tuesday'}));
-  });
-  allWeekdaysInMonth(year,month1,4).forEach(d=>{
-    let k=dateKey(d);
-    ['Czech','Slovakia','Lebanon'].forEach(m=>r.push({
-      id:`detailed-${m.toLowerCase()}-${k}`,
-      name:`Detailed Report — ${m}`,
-      due:new Date(d),icon:'🔍',type:'weekly',dayLabel:'Every Thursday'
-    }));
-  });
-  return r;
 }
 
-// Core function — tested and verified with 26/26 unit tests passing
-function getAllReportsForWeek(wStart, wEnd){
-  let wStartKey=dateKey(wStart), wEndKey=dateKey(wEnd);
-  let seenMonth=new Set(), seenId=new Set(), result=[];
+function getAllReportsForWeek(wStart,wEnd){
+  let wStartKey=dateKey(wStart),wEndKey=dateKey(wEnd);
+  let seenMonth=new Set(),seenId=new Set(),result=[];
   for(let i=0;i<7;i++){
     let day=addDays(wStart,i);
-    let year=day.getFullYear();
-    let month1=day.getMonth()+1; // ← single zero→one-based conversion point
+    let year=day.getFullYear(),month1=day.getMonth()+1;
     let mk=year+'|'+month1;
-    if(seenMonth.has(mk)) continue;
+    if(seenMonth.has(mk))continue;
     seenMonth.add(mk);
     [...getMonthlyReports(year,month1),...getWeeklyReports(year,month1)].forEach(r=>{
-      let dk=dateKey(r.due);
-      if(dk>=wStartKey && dk<=wEndKey && !seenId.has(r.id)){
-        seenId.add(r.id); result.push(r);
-      }
+      if(!seenId.has(r.id)){seenId.add(r.id);result.push(r);}
     });
   }
-  result.sort((a,b)=>dateKey(a.due).localeCompare(dateKey(b.due))||a.name.localeCompare(b.name));
-  return result;
+  // Apply overrides BEFORE filtering by date — overridden dates may move reports in/out of week
+  let withOverrides=applyOverrides(result);
+  return withOverrides
+    .filter(r=>{let dk=dateKey(r.due);return dk>=wStartKey&&dk<=wEndKey;})
+    .sort((a,b)=>dateKey(a.due).localeCompare(dateKey(b.due))||a.name.localeCompare(b.name));
 }
 
-function getAllReportsForMonth(year, month1){
+function getAllReportsForMonth(year,month1){
   let all=[...getMonthlyReports(year,month1),...getWeeklyReports(year,month1)];
-  let seen=new Set(), result=[];
+  let seen=new Set(),result=[];
   all.forEach(r=>{if(!seen.has(r.id)){seen.add(r.id);result.push(r);}});
-  result.sort((a,b)=>dateKey(a.due).localeCompare(dateKey(b.due))||a.name.localeCompare(b.name));
-  return result;
+  let withOverrides=applyOverrides(result);
+  return withOverrides.sort((a,b)=>dateKey(a.due).localeCompare(dateKey(b.due))||a.name.localeCompare(b.name));
 }
 
-// ─── Supabase ───
-let state={};
+// ─── Supabase state ───
+let state={};    // id → status
+let overrides={}; // id → {due_date, comment}
 
 async function loadStatuses(){
   try{
-    let res=await fetch(`${TABLE_URL}?select=id,status`,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
-    if(!res.ok) throw new Error(await res.text());
-    let rows=await res.json();
-    state={};
-    rows.forEach(r=>{state[r.id]=r.status;});
-    setSyncStatus('✓ Synced');
-  }catch(e){setSyncStatus('⚠ DB error: '+e.message);}
+    let res=await fetch(`${STATUS_URL}?select=id,status`,{headers:HDR});
+    if(!res.ok)throw new Error(await res.text());
+    (await res.json()).forEach(r=>{state[r.id]=r.status;});
+  }catch(e){setSyncStatus('⚠ Status load error: '+e.message);}
+}
+
+async function loadOverrides(){
+  try{
+    let res=await fetch(`${OVERRIDE_URL}?select=id,due_date,comment`,{headers:HDR});
+    if(!res.ok)throw new Error(await res.text());
+    (await res.json()).forEach(r=>{overrides[r.id]={due_date:r.due_date,comment:r.comment};});
+  }catch(e){setSyncStatus('⚠ Override load error: '+e.message);}
 }
 
 async function saveStatus(id,status){
   try{
     setSyncStatus('Saving…');
-    let res=await fetch(TABLE_URL,{method:'POST',headers:AUTH_HEADERS,body:JSON.stringify({id,status,updated_at:new Date().toISOString()})});
-    if(!res.ok) throw new Error(await res.text());
+    let res=await fetch(STATUS_URL,{method:'POST',headers:HDR,body:JSON.stringify({id,status,updated_at:new Date().toISOString()})});
+    if(!res.ok)throw new Error(await res.text());
     setSyncStatus('✓ Saved');
   }catch(e){setSyncStatus('⚠ Save failed: '+e.message);}
 }
 
-async function deleteStatuses(ids){
-  if(!ids.length) return;
+async function saveOverrideToDb(id,due_date,comment){
   try{
-    setSyncStatus('Resetting…');
-    let res=await fetch(`${TABLE_URL}?id=in.(${ids.join(',')})`,{method:'DELETE',headers:AUTH_HEADERS});
-    if(!res.ok) throw new Error(await res.text());
+    setSyncStatus('Saving override…');
+    let res=await fetch(OVERRIDE_URL,{method:'POST',headers:HDR,body:JSON.stringify({id,due_date,comment,updated_at:new Date().toISOString()})});
+    if(!res.ok)throw new Error(await res.text());
+    setSyncStatus('✓ Override saved');
+  }catch(e){setSyncStatus('⚠ Override save failed: '+e.message);}
+}
+
+async function deleteOverrideFromDb(id){
+  try{
+    setSyncStatus('Removing override…');
+    let res=await fetch(`${OVERRIDE_URL}?id=eq.${encodeURIComponent(id)}`,{method:'DELETE',headers:HDR});
+    if(!res.ok)throw new Error(await res.text());
+    setSyncStatus('✓ Override removed');
+  }catch(e){setSyncStatus('⚠ Remove failed: '+e.message);}
+}
+
+async function deleteStatuses(ids){
+  if(!ids.length)return;
+  try{
+    await fetch(`${STATUS_URL}?id=in.(${ids.join(',')})`,{method:'DELETE',headers:HDR});
+    await fetch(`${OVERRIDE_URL}?id=in.(${ids.join(',')})`,{method:'DELETE',headers:HDR});
     setSyncStatus('✓ Reset done');
-  }catch(e){setSyncStatus('⚠ Reset failed: '+e.message);}
+  }catch(e){setSyncStatus('⚠ Reset error: '+e.message);}
 }
 
 function setSyncStatus(m){let el=document.getElementById('sync-status');if(el)el.textContent=m;}
@@ -242,18 +294,69 @@ function getStatus(id){return state[id]||'pending';}
 
 async function cycleStatus(id){
   let next={pending:'inprog',inprog:'done',done:'pending'}[getStatus(id)];
-  state[id]=next;
-  renderAll();
+  state[id]=next; renderAll();
   await saveStatus(id,next);
 }
 
 async function confirmReset(){
-  if(!confirm('Reset all statuses for the current view to Pending?')) return;
-  let yr=viewYear, mo=viewMonth1;
+  if(!confirm('Reset all statuses and due date overrides for the current view?'))return;
+  let yr=viewYear,mo=viewMonth1;
   let ids=[...getMonthlyReports(yr,mo),...getWeeklyReports(yr,mo)].map(r=>r.id);
-  ids.forEach(id=>delete state[id]);
+  ids.forEach(id=>{delete state[id];delete overrides[id];});
   renderAll();
   await deleteStatuses(ids);
+}
+
+// ─── Modal logic ───
+let modalReportId=null, modalOriginalDue=null;
+
+function openEditModal(id,name,due,originalDue,comment,type){
+  modalReportId=id;
+  modalOriginalDue=originalDue||due;
+  document.getElementById('modal-title').textContent=name;
+  document.getElementById('modal-subtitle').textContent=(type==='weekly'?'Weekly recurring':'Monthly fixed')+' report';
+  document.getElementById('modal-date').value=dateKey(due);
+  document.getElementById('modal-comment').value=comment||'';
+  // Show original due if overridden
+  let origKey=dateKey(modalOriginalDue);
+  document.getElementById('modal-original').textContent=
+    overrides[id]?`Original due date: ${modalOriginalDue.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}`:'';
+  // Show reset button only if already overridden
+  document.getElementById('modal-reset-btn').style.display=overrides[id]?'':'none';
+  // Show previous comment/history if exists
+  let hist=document.getElementById('modal-history');
+  if(overrides[id]){
+    hist.innerHTML=`<div class="history-box">
+      <strong>Current override:</strong> Due changed to ${parseDateKey(overrides[id].due_date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
+      ${overrides[id].comment?`<br><strong>Reason:</strong> ${overrides[id].comment}`:''}
+    </div>`;
+  } else { hist.innerHTML=''; }
+  document.getElementById('modal').style.display='flex';
+}
+
+function closeModal(e){
+  if(e&&e.target!==document.getElementById('modal'))return;
+  document.getElementById('modal').style.display='none';
+  modalReportId=null;
+}
+
+async function saveOverride(){
+  let id=modalReportId;
+  let dateVal=document.getElementById('modal-date').value;
+  let comment=document.getElementById('modal-comment').value.trim();
+  if(!dateVal){alert('Please select a due date.');return;}
+  overrides[id]={due_date:dateVal,comment};
+  document.getElementById('modal').style.display='none';
+  renderAll();
+  await saveOverrideToDb(id,dateVal,comment);
+}
+
+async function clearOverride(){
+  let id=modalReportId;
+  delete overrides[id];
+  document.getElementById('modal').style.display='none';
+  renderAll();
+  await deleteOverrideFromDb(id);
 }
 
 // ─── UI helpers ───
@@ -266,30 +369,38 @@ function reportCard(r){
   let s=getStatus(r.id);
   let overdue=s!=='done'&&isOverdue(r.due);
   let todayDue=isTodayDate(r.due);
-  let cls='report-card'+(overdue?' overdue':todayDue?' today-due':'');
-  let badges=(overdue?'<span class="badge badge-overdue">Overdue</span>':'')+(todayDue?'<span class="badge badge-today">Due today</span>':'');
+  let cls='report-card'+(r.overridden?' overridden':overdue?' overdue':todayDue?' today-due':'');
+  let badges='';
+  if(r.overridden) badges+=`<span class="badge badge-overridden">Date changed</span>`;
+  else if(overdue)  badges+=`<span class="badge badge-overdue">Overdue</span>`;
+  else if(todayDue) badges+=`<span class="badge badge-today">Due today</span>`;
   let iconCls=r.type==='weekly'?'icon-weekly':'icon-monthly';
-  let meta=`Due ${r.due.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}`+(r.dayLabel?` · ${r.dayLabel}`:'');
-  return `<div class="${cls}" onclick="cycleStatus('${r.id}')">
+  let dueStr=r.due.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  let meta=`Due ${dueStr}`+(r.dayLabel?` · ${r.dayLabel}`:'');
+  let commentLine=r.comment?`<div class="report-comment">💬 ${r.comment}</div>`:'';
+  // Edit button data attrs
+  let origDueKey=r.originalDue?dateKey(r.originalDue):'';
+  return `<div class="${cls}">
     <div class="report-icon ${iconCls}">${r.icon}</div>
-    <div class="report-main">
+    <div class="report-main" onclick="cycleStatus('${r.id}')">
       <div class="report-name">${r.name}${badges}</div>
       <div class="report-meta">${meta}</div>
+      ${commentLine}
     </div>
-    <button class="status-btn ${statusClass(s)}" onclick="event.stopPropagation();cycleStatus('${r.id}')">${statusLabel(s)}</button>
+    <div class="card-actions">
+      <button class="edit-btn" title="Edit due date / add comment"
+        onclick="openEditModal('${r.id}',${JSON.stringify(r.name)},new Date('${dateKey(r.due)}'),${r.originalDue?`new Date('${origDueKey}')`:'null'},${JSON.stringify(r.comment||'')},${JSON.stringify(r.type)})">✏️</button>
+      <button class="status-btn ${statusClass(s)}" onclick="cycleStatus('${r.id}')">${statusLabel(s)}</button>
+    </div>
   </div>`;
 }
 
 function groupByDate(reports){
-  let g={};
-  reports.forEach(r=>{let k=dateKey(r.due);g[k]=g[k]||[];g[k].push(r);});
-  return g;
+  let g={};reports.forEach(r=>{let k=dateKey(r.due);g[k]=g[k]||[];g[k].push(r);});return g;
 }
 
-// ─── Views ───
-let currentTab='weekly';
-let viewYear=TODAY.getFullYear();
-let viewMonth1=TODAY.getMonth()+1; // 1-based
+// ─── Tab & nav state ───
+let currentTab='weekly',viewYear=TODAY.getFullYear(),viewMonth1=TODAY.getMonth()+1;
 let viewWeekStart=getMonday(TODAY);
 
 function changeWeek(dir){viewWeekStart=addDays(viewWeekStart,dir*7);renderAll();}
@@ -299,7 +410,6 @@ function changeMonth(dir){
   if(viewMonth1>12){viewMonth1=1;viewYear++;}
   renderAll();
 }
-
 function switchTab(t){
   currentTab=t;
   document.getElementById('tab-weekly').className='tab'+(t==='weekly'?' active':'');
@@ -309,11 +419,11 @@ function switchTab(t){
   renderAll();
 }
 
+// ─── Render weekly ───
 function renderWeekly(){
-  let wStart=viewWeekStart, wEnd=addDays(wStart,6);
+  let wStart=viewWeekStart,wEnd=addDays(wStart,6);
   let reports=getAllReportsForWeek(wStart,wEnd);
   let wLabel=`${wStart.toLocaleDateString('en-GB',{day:'numeric',month:'short'})} – ${wEnd.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}`;
-
   let html=`<div class="nav-row">
     <button class="nav-btn" onclick="changeWeek(-1)">← Prev week</button>
     <span class="month-title">Week of ${wLabel}</span>
@@ -323,15 +433,14 @@ function renderWeekly(){
     <div class="legend-item"><div class="ldot" style="background:#f5a623"></div>Pending</div>
     <div class="legend-item"><div class="ldot" style="background:#3b8bd4"></div>In Progress</div>
     <div class="legend-item"><div class="ldot" style="background:#2e9e6b"></div>Done</div>
-    <div class="legend-item" style="margin-left:auto;font-size:11px">${reports.length} reports this week · tap to cycle status</div>
+    <div class="legend-item"><div class="ldot" style="background:#7f77dd"></div>Date changed</div>
+    <div class="legend-item" style="margin-left:auto;font-size:11px">${reports.length} reports · tap card to cycle · ✏️ to edit</div>
   </div>`;
-
-  if(!reports.length){
-    html+=`<div class="empty">No reports due this week.</div>`;
-  } else {
+  if(!reports.length){html+=`<div class="empty">No reports due this week.</div>`;}
+  else{
     let groups=groupByDate(reports);
     Object.keys(groups).sort().forEach(dk=>{
-      let reps=groups[dk], d=reps[0].due;
+      let reps=groups[dk],d=reps[0].due;
       let isToday=dk===dateKey(TODAY);
       let dayName=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
       html+=`<div class="section-title${isToday?' today-hd':''}">${dayName}${isToday?' — Today':''} <span style="font-weight:400;color:#999">(${reps.length})</span></div>`;
@@ -341,29 +450,27 @@ function renderWeekly(){
   document.getElementById('view-weekly').innerHTML=html;
 }
 
+// ─── Render monthly ───
 function renderMonthly(){
-  let yr=viewYear, mo=viewMonth1;
+  let yr=viewYear,mo=viewMonth1;
   let reports=getAllReportsForMonth(yr,mo);
   let mName=new Date(yr,mo-1,1).toLocaleString('en-GB',{month:'long',year:'numeric'});
-
   let html=`<div class="nav-row">
     <button class="nav-btn" onclick="changeMonth(-1)">← Prev</button>
     <span class="month-title">${mName}</span>
     <button class="nav-btn" onclick="changeMonth(1)">Next →</button>
   </div>`;
-
   html+=buildCalendar(yr,mo,reports);
-
   html+=`<div class="legend" style="margin-top:12px">
     <div class="legend-item"><div class="ldot" style="background:#f5a623"></div>Pending</div>
     <div class="legend-item"><div class="ldot" style="background:#3b8bd4"></div>In Progress</div>
     <div class="legend-item"><div class="ldot" style="background:#2e9e6b"></div>Done</div>
-    <div class="legend-item" style="margin-left:auto;font-size:11px">${reports.length} reports this month</div>
+    <div class="legend-item"><div class="ldot" style="background:#7f77dd"></div>Date changed</div>
+    <div class="legend-item" style="margin-left:auto;font-size:11px">${reports.length} reports · ✏️ to edit</div>
   </div>`;
-
   let groups=groupByDate(reports);
   Object.keys(groups).sort().forEach(dk=>{
-    let reps=groups[dk], d=reps[0].due;
+    let reps=groups[dk],d=reps[0].due;
     let isToday=dk===dateKey(TODAY);
     let dayName=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
     html+=`<div class="section-title${isToday?' today-hd':''}">${dayName}${isToday?' — Today':''} <span style="font-weight:400;color:#999">(${reps.length})</span></div>`;
@@ -372,36 +479,30 @@ function renderMonthly(){
   document.getElementById('view-monthly').innerHTML=html;
 }
 
-function buildCalendar(yr, month1, reports){
+function buildCalendar(yr,month1,reports){
   let dayMap={};
   reports.forEach(r=>{let dk=dateKey(r.due);dayMap[dk]=dayMap[dk]||[];dayMap[dk].push(r);});
   let days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   let html=`<div class="month-grid"><div class="week-row">`;
   days.forEach(d=>{html+=`<div class="day-label">${d}</div>`;});
   html+=`</div>`;
-  let first=new Date(yr,month1-1,1);
-  let startDow=(first.getDay()+6)%7;
-  let daysInMonth=new Date(yr,month1,0).getDate();
-  let prevDays=new Date(yr,month1-1,0).getDate();
+  let first=new Date(yr,month1-1,1),startDow=(first.getDay()+6)%7;
+  let daysInMonth=new Date(yr,month1,0).getDate(),prevDays=new Date(yr,month1-1,0).getDate();
   let cells=[];
   for(let i=startDow-1;i>=0;i--) cells.push({day:prevDays-i,mo:month1-1<1?12:month1-1,yr:month1-1<1?yr-1:yr,other:true});
   for(let d=1;d<=daysInMonth;d++) cells.push({day:d,mo:month1,yr,other:false});
-  while(cells.length%7!==0){
-    let n=cells.length-(daysInMonth+startDow)+1;
-    cells.push({day:n,mo:month1+1>12?1:month1+1,yr:month1+1>12?yr+1:yr,other:true});
-  }
+  while(cells.length%7!==0){let n=cells.length-(daysInMonth+startDow)+1;cells.push({day:n,mo:month1+1>12?1:month1+1,yr:month1+1>12?yr+1:yr,other:true});}
   for(let i=0;i<cells.length;i++){
     if(i%7===0) html+=`<div class="week-row">`;
-    let c=cells[i], d=new Date(c.yr,c.mo-1,c.day);
-    let dk=dateKey(d), isWknd=d.getDay()===0||d.getDay()===6;
+    let c=cells[i],d=new Date(c.yr,c.mo-1,c.day);
+    let dk=dateKey(d),isWknd=d.getDay()===0||d.getDay()===6;
     let isToday=!c.other&&dk===dateKey(TODAY);
-    html+=`<div class="cal-day${c.other?' other-month':''}${isWknd?' weekend':''}${isToday?' today':''}">
-      <div class="day-num">${c.day}</div>`;
-    if(!c.other && dayMap[dk]){
-      let reps=dayMap[dk], show=Math.min(reps.length,3);
+    html+=`<div class="cal-day${c.other?' other-month':''}${isWknd?' weekend':''}${isToday?' today':''}"><div class="day-num">${c.day}</div>`;
+    if(!c.other&&dayMap[dk]){
+      let reps=dayMap[dk],show=Math.min(reps.length,3);
       for(let j=0;j<show;j++){
         let s=getStatus(reps[j].id);
-        let dc={pending:'dot-pending',inprog:'dot-inprog',done:'dot-done'}[s];
+        let dc=reps[j].overridden?'dot-inprog':{pending:'dot-pending',inprog:'dot-inprog',done:'dot-done'}[s];
         let short=reps[j].name.replace('Health Index','HI').replace('Report','Rpt').replace('Detailed ','').replace('Intermediate','Int').replace('Finalized','Final').replace('Recommendation','Rec').replace('— ','');
         html+=`<div class="cal-dot ${dc}" title="${reps[j].name}">${short}</div>`;
       }
@@ -410,8 +511,7 @@ function buildCalendar(yr, month1, reports){
     html+=`</div>`;
     if(i%7===6) html+=`</div>`;
   }
-  html+=`</div>`;
-  return html;
+  return html+`</div>`;
 }
 
 function renderAll(){
@@ -421,11 +521,10 @@ function renderAll(){
 }
 
 async function init(){
-  await loadStatuses();
+  await Promise.all([loadStatuses(),loadOverrides()]);
   document.getElementById('loading').style.display='none';
   renderAll();
 }
-
 init();
 </script>
 </body>
